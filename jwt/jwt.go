@@ -100,6 +100,7 @@ func (j *JwtUtil) Hs256RefreshToken(token_ string) (string, error) {
 	return token_, nil
 }
 
+// 修改签名秘钥
 func InitSingKey(singKey1 string) {
 	singKey = []byte(singKey1)
 }
@@ -117,4 +118,8 @@ func (j *JwtUtil) ParseUserFromToken(token_ string) (*User, error) {
 		return user, nil
 	}
 	return nil, errors.New("invalid token or token claims")
+}
+
+func init() {
+	singKey = []byte("chjksdvbudfvsdvvf")
 }
