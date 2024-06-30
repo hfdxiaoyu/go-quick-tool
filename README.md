@@ -2,6 +2,9 @@
 
 ```azure
 go-quick-tool 是一个常用业务实现的库
+
+install
+go get -u github.com/hfdxiaoyu/go-quick-tool
 ```
 
 ### package
