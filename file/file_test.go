@@ -11,11 +11,11 @@ func TestReadFile(t *testing.T) {
 }
 
 func TestReadFileByBuffer(t *testing.T) {
-	fileData, err := ReadFile("./test.txt")
+	fileData, err := ReadFileByBuffer("./test.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(string(fileData))
+	t.Log(fileData)
 }
 
 func TestWriteFile(t *testing.T) {
