@@ -9,7 +9,9 @@ go get -u github.com/hfdxiaoyu/go-quick-tool
 
 ### package
 ```azure
-csv csv相关操作
-network 网络相关操作 
-jwt jwt 相关操作
+csv     csv相关操作
+http    网络相关操作 
+jwt     jwt相关操作
+time    时间转换先关操作
+file    文件相关操作
 ```
