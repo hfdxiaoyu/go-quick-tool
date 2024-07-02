@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	expiration_time_minute = 20
-	expiration_time_hour   = 60
+	expiration_time_minute = 1200
+	expiration_time_hour   = 3600
+	renewal_time_minute    = 180
 )
 
 var (
@@ -18,11 +19,13 @@ var (
 )
 
 type JwtUtil struct {
+	ExpiresAt   int64   //过期时间，秒
+	RenewalTime float64 //续签时间
 }
 
 type User struct {
-	Id       int64
-	UserType int32
+	Id   int64
+	Data any
 }
 
 // 加密的秘钥
@@ -36,6 +39,8 @@ type UserClaims struct {
 func NewJwtUtil() *JwtUtil {
 	once.Do(func() {
 		jwtUtil = &JwtUtil{}
+		jwtUtil.ExpiresAt = expiration_time_minute
+		jwtUtil.RenewalTime = renewal_time_minute
 	})
 	return jwtUtil
 }
@@ -43,7 +48,7 @@ func NewJwtUtil() *JwtUtil {
 // 生成一个sh256加密的jwt
 func (j *JwtUtil) NewHs256Token(user User) (string, error) {
 	userClaims := UserClaims{user, jwt.RegisteredClaims{
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiration_time_minute) * time.Hour)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(j.ExpiresAt) * time.Second)),
 	}}
 	//1、生成token
 	//使用指定的签名方法创建一个新的token
@@ -85,10 +90,11 @@ func (j *JwtUtil) Hs256RefreshToken(token_ string) (string, error) {
 		return "", err
 	}
 	if claims, ok := token.Claims.(*UserClaims); ok {
-		exat := claims.ExpiresAt //拿到过期时间
+		now := time.Now()
+		expiresAt := claims.ExpiresAt.Time //拿到过期时间
 		//判断是否要续签
-		if exat.Time.Unix() >= time.Now().Unix() &&
-			exat.Unix()-time.Now().Unix() <= 60*3 {
+		if expiresAt.After(now) &&
+			expiresAt.Sub(now).Seconds() <= j.RenewalTime {
 			newtoken, err := j.NewHs256Token(claims.User)
 			if err != nil {
 				return "", err
@@ -112,8 +118,8 @@ func (j *JwtUtil) ParseUserFromToken(token_ string) (*User, error) {
 	}
 	if claims, ok := token.Claims.(*UserClaims); ok && token.Valid {
 		user := &User{
-			Id:       claims.Id,
-			UserType: claims.UserType,
+			Id:   claims.Id,
+			Data: claims.Data,
 		}
 		return user, nil
 	}
