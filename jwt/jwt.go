@@ -3,7 +3,6 @@ package jwt
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
-	"sync"
 	"time"
 )
 
@@ -11,11 +10,6 @@ const (
 	expiration_time_minute  = 1200
 	expiration_renewal_time = 3600
 	renewal_time_minute     = 180
-)
-
-var (
-	jwtUtil *JwtUtil
-	once    sync.Once
 )
 
 type JwtUtil struct {
@@ -38,13 +32,11 @@ type UserClaims struct {
 }
 
 func NewJwtUtil() *JwtUtil {
-	once.Do(func() {
-		jwtUtil = &JwtUtil{}
-		jwtUtil.ExpiresAt = expiration_time_minute
-		jwtUtil.RenewalTime = renewal_time_minute
-		jwtUtil.ExpiresRenewalTimeAt = expiration_renewal_time
-	})
-	return jwtUtil
+	return &JwtUtil{
+		ExpiresAt:            expiration_time_minute,
+		ExpiresRenewalTimeAt: renewal_time_minute,
+		RenewalTime:          expiration_renewal_time,
+	}
 }
 
 // 生成一个sh256加密的jwt
